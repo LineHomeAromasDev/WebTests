@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>HTML Editor with Preview</title>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/theme/dracula.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,0,0" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+ 
+ <style>
+ body {
+ font-family: "Lato", sans-serif;
+ padding: 0;
+ margin: 0;
+ height:100%;
+ }
+ .editor-container {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+ background-color:#000;
+ }
+ .CodeMirror {
+ height: 100%;
+ padding:80px 0;
+ }
+ 
+ .dark-theme {
+    background-color: #282a36;
+    color: #f8f8f2;
+}
+
+.dark-theme #topBanner {
+    background: rgba(68, 71, 85, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme #refreshButton,
+.dark-theme #themeButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+ 
+ 
+ #topBanner {
+ position:fixed;
+ top:0;
+ left:0;
+ margin-bottom:-80px;
+ height:80px;
+ width:100vw;
+ z-index:1000;
+ white-space:no-wrap;
+ background: rgba(68, 71, 85, 0.5);
+ backdrop-filter: blur(5px);
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ border-bottom: 1px solid rgba(255,255,255,0.1);
+ }
+ #logoBtn {
+ height: fit-content;
+ width: fit-content;
+ }
+ #logoBtn img {
+ width:auto;
+ height:25px;
+ animation: animate 40s linear infinite;
+}
+ #refreshButton {
+ height:40px;
+ width:40px;
+ border-radius:50%;
+ border:none;
+ border: 1px solid rgba(255,255,255,0.3);
+ background: rgba(255,255,255,0.1);
+ color:rgba(255,255,255,1);
+ font-size: 10pt;
+ cursor: pointer;
+ margin: 0 5px;
+ transition:0.2s;
+ user-select: none;
+ -webkit-user-select: none;
+ -webkit-tap-highlight-color:transparent;
+ white-space:nowrap;
+}
+
+@keyframes animate {
+ 0%
+ {
+ filter: hue-rotate(-5deg);
+ }
+ 100%
+ {
+ filter: hue-rotate(360deg);
+ }
+}
+
+ .button-container {
+ display: flex;
+ flex: 1;
+ flex-direction:column;
+ width: 100%;
+ height: 80px;
+ position: fixed;
+ bottom: 0;
+ left: 0;
+ background: rgba(68, 71, 85, 0.5);
+ backdrop-filter: blur(5px);
+ }
+ .buttonRow1{
+ display:flex;
+ flex-wrap:nowrap;
+ align-items: center;
+ overflow-x:scroll;
+ height:40px;
+ width:100%;
+ border-top: 1px solid rgba(255,255,255,0.1);
+ }
+ .buttonRow1 button {
+ padding: 0 10px;
+ height: 30px;
+ width:fit-content;
+ border: 1px solid rgba(255,255,255,0.3);
+ background: rgba(255,255,255,0.1);
+ color:rgba(255,255,255,1);
+ border-radius: 15px;
+ font-size: 10pt;
+ cursor: pointer;
+ margin: 0 5px;
+ transition:0.2s;
+ user-select: none;
+ -webkit-user-select: none;
+ -webkit-tap-highlight-color:transparent;
+ white-space:nowrap;
+ }
+ .buttonRow1 button:hover {
+ transform:scale(1.1);
+ }
+ .buttonRow1 button:active {
+ transform: scale(0.9);
+ }
+ .mini-preview {
+ visibility:hidden;
+ top:85px;
+ right:5px;
+ width: calc(100vw / 3);
+ height: calc(100vh / 3);
+ z-index: 1001;
+ position: fixed;
+ display: flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction: column;
+ filter: opacity(0.7);
+ transition: 0.2s filter;
+ }
+ .mini-preview:active, .mini-preview:hover{
+ filter: opacity(1);
+ }
+ 
+ .mini-preview-iframe {
+ flex-grow: 1;
+ width: 100%;
+ border: none;
+ border-radius: 5px;
+ box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+ background: rgba(255,255,255,1);
+ }
+
+ #drag-handle {
+ background-color: rgba(255,255,255, 1);
+ cursor: move;
+ padding: 0;
+ margin-bottom: 5px;
+ border-radius: 10px;
+ display: flex;
+ position:absolute;
+ top:0;
+ align-items: center;
+ justify-content: center;
+ height: 20px;
+ width: 20px;
+ transition:0.2s ease-in-out;
+ }
+
+ #drag-handle:hover {
+height:20px;
+border-radius:10px;
+width:calc(50%);
+ }
+ #drag-handle:hover:active {
+height:30px;
+border-radius:15px;
+width:90%;
+ }
+
+ 
+ .drag-icon {
+ height:3px;
+ width:3px;
+ border-radius:2px;
+ background:rgba(0,0,0,0.6);
+ margin:0 1px;
+ }
+ 
+ .preview-overlay {
+ display: none;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background-color: white;
+ z-index: 1000;
+ overflow: hidden;
+ }
+ .preview-iframe {
+ width: 100%;
+ height: calc(100%);
+ border: none;
+ }
+ .preview-banner {
+ position: sticky;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ bottom: 0;
+ width: 100%;
+ background-color: rgba(68, 71, 85, 0.5);
+ backdrop-filter: blur(5px);
+ color: white;
+ padding: 0;
+ height:50px;
+ z-index: 1001;
+ }
+ .preview-banner button {
+ height: 30px;
+ width:fit-content;
+ border: 1px solid rgba(255, 255, 255, 0.3);
+ background: rgba(255, 255, 255, 0.1);
+ color:rgba(255, 255, 255, 1);
+ border-radius: 15px;
+ font-size: 9pt;
+ cursor: pointer;
+ margin: 0 5px;
+ }
+
+.trigger {
+    position:fixed;
+top:calc(50% - 25px);
+left:0;
+width:50px;
+height:50px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+background:white;
+z-index:1000;
+transition: 0.5s ease-in-out; /* Animation for sliding */
+margin-left:5px;
+}
+
+.expandable-content {
+    position: fixed; /* Make it positionable relative to its parent */
+    top: 80px; /* Align to top of its container */
+    right: 100%; /* Initially off-screen to the left */
+    width: 400px; /* Set desired width */
+height:calc(100% - 160px);
+    transition: transform 0.5s ease-in-out; /* Animation for sliding */
+background-color: rgba(68, 71, 85, 0.5);
+    backdrop-filter: blur(5px);
+    z-index:1000;
+display:flex;
+justify-content:flex-start;
+align-items:center;
+flex-direction:column;
+border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.expandable-content.expanded {
+    transform: translateX(100%); /* Slide in from the left */
+transition: transform 0.5s ease-in-out; /* Animation for sliding */
+}
+
+.gradient-text {
+  font-size:18pt;
+  /* Fallback: Set */
+  background-color: white;
+  /* Create the gradient. */
+  background-image: linear-gradient(320deg, rgba(255,193,148,1) 0%, rgba(215,118,255,1) 100%);
+  /* Set the background size and repeat properties. */
+  background-size: 100%;
+  background-repeat: repeat;
+
+  /* Use the text as a mask for the background. */
+  /* This will show the gradient as a text color rather than element bg. */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
+
+.templateButtonContainer {
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius: 15px;
+  width: calc(100% - 20px);
+  padding:10px;
+  box-sizing:border-box;
+}
+
+
+ 
+ @media (min-width: 600px) {
+ 
+ 
+ 
+ }
+
+
+ 
+ </style>
+</head>
+<body>
+ 
+<div id="topBanner">
+<button id="refreshButton"><span class="material-symbols-outlined">refresh</span></button>
+<a id="logoBtn"><img src="https://cdn.shopify.com/s/files/1/0550/8782/5151/files/CodeMingle_Pink.svg?v=1718105141" alt="CodeMingle Logo"></a>
+<button id="themeButton">
+            <span class="material-symbols-outlined">brightness_4</span>
+</button>
+</div>
+ 
+
+<div class="trigger"><span class="material-symbols-outlined">arrow_forward</span></div>
+<div class="expandable-content">
+<h1 class="gradient-text">Something to inspire you</h1>
+<div class="templateButtonContainer">
+      <button id="populateBtn">Webpage Starter</button>
+</div>
+</div>
+
+
+<div id="miniPreview" class="mini-preview draggable">
+  <div id="drag-handle" class="handle">
+    <div class="drag-icon"></div>
+    <div class="drag-icon"></div>
+    <div class="drag-icon"></div>
+  </div>
+
+  <button id="expand-preview">Expand Preview</button>
+ 
+  <iframe id="miniPreviewFrame" class="mini-preview-iframe">
+  </iframe>
+</div>
+
+	<div class="editor-container"></div>
+<textarea id="codeEditor"></textarea>
+
+<div class="button-container">
+ 
+ <div class="buttonRow1">
+ <button id="previewBtn">
+ <span class="material-symbols-outlined">fullscreen</span>
+ </button>
+ <button id="copyBtn">
+ <span class="material-symbols-outlined">content_copy</span>
+ </button>
+ <button id="cutBtn">
+ <span class="material-symbols-outlined">content_cut</span>
+ </button>
+ <button id="pasteBtn">
+ <span class="material-symbols-outlined">content_paste</span>
+ </button>
+ <button id="saveBtn"><span class="material-symbols-outlined">save</span></button>
+ <button id="toggleThemeBtn"><span class="material-symbols-outlined">lightbulb</span></button>
+ <button id="undoBtn"><span class="material-symbols-outlined">undo</span></button>
+ <button id="redoBtn"><span class="material-symbols-outlined">redo</span></button>
+ <button id="toggleMiniPreviewBtn"><span class="material-symbols-outlined">picture_in_picture_mobile</span></button>
+ </div>
+ 
+ <div class="buttonRow1">
+ <button onclick="insertElement('<h1>Heading 1</h1>')">h1</button>
+ <button onclick="insertElement('<h2>Heading 2</h2>')">h2</button>
+ <button onclick="insertElement('<p>Paragraph 1</p>')">p</button>
+ <button onclick="insertElement('<p1>Paragraph 2</p1>')">p1</button>
+ <button onclick="insertElement('<ul><li>List Item</li></ul>')">ul</button>
+ <button onclick="insertElement('<div></div>')">div</button>
+ <button id="imgBtn">img</button>
+ </div>
+</div>
+
+<div id="previewOverlay" class="preview-overlay">
+ <iframe id="preview" class="preview-iframe"></iframe>
+ <div class="preview-banner">
+ <p1>You are in preview mode</p1>
+
+<button id="closePreviewBtn" style="">Close</button>
+ </div>
+</div>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/mode/multiplex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/display/placeholder.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/search.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/searchcursor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/jump-to-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/dialog/dialog.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
+
+	
+<script>
+const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+  mode: 'htmlmixed',
+  lineNumbers: true,
+  // Add this line
+  onSuccess: () => console.log('CodeMirror editor initialized successfully!')
+});
+
+
+var button = document.getElementById("refreshButton");
+
+button.addEventListener("click", function() {
+    window.location.reload();
+});
+
+
+function updatePreview() {
+ const previewFrame = document.getElementById('preview');
+ const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
+ preview.open();
+ preview.write(editor.getValue());
+ preview.close();
+
+ const miniPreviewFrame = document.getElementById('miniPreviewFrame');
+ const miniPreview = miniPreviewFrame.contentDocument || miniPreviewFrame.contentWindow.document;
+ miniPreview.open();
+ miniPreview.write(editor.getValue());
+ miniPreview.close();
+}
+
+editor.on('change', updatePreview);
+
+document.getElementById('previewBtn').addEventListener('click', () => {
+ document.getElementById('previewOverlay').style.display = 'block';
+ document.getElementById('miniPreview').style.visibility = 'hidden';
+ updatePreview();
+});
+
+document.getElementById('closePreviewBtn').addEventListener('click', () => {
+ document.getElementById('previewOverlay').style.display = 'none';
+});
+
+
+
+
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+ const selectedText = editor.getSelection();
+ navigator.clipboard.writeText (selectedText).then(() => {
+ }).catch(err => {
+ console.error('Could not copy text: ', err);
+ });
+});
+
+document.getElementById('cutBtn').addEventListener('click', () => {
+ const selectedText = editor.getSelection();
+ navigator.clipboard.writeText(selectedText).then(() => {
+ editor.replaceSelection('');
+ }).catch(err => {
+ console.error('Could not cut text: ', err);
+ });
+});
+
+document.getElementById('pasteBtn').addEventListener('click', () => {
+ navigator.clipboard.readText().then(text => {
+ const doc = editor.getDoc();
+ const cursor = doc.getCursor();
+ doc.replaceRange(text, cursor);
+ }).catch(err => {
+ console.error('Failed to read clipboard contents: ', err);
+ });
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+ localStorage.setItem('code', editor.getValue());
+});
+
+document.getElementById('toggleThemeBtn').addEventListener('click', () => {
+ const currentTheme = editor.getOption('theme');
+ const newTheme = currentTheme === 'dracula' ? 'default' : 'dracula';
+ editor.setOption('theme', newTheme);
+});
+
+document.getElementById('undoBtn').addEventListener('click', () => {
+ editor.undo();
+});
+
+document.getElementById('redoBtn').addEventListener('click', () => {
+ editor.redo();
+});
+
+document.getElementById('toggleMiniPreviewBtn').addEventListener('click', () => {
+ const miniPreview = document.getElementById('miniPreview');
+ if (miniPreview.style.visibility === 'visible') {
+ miniPreview.style.visibility = 'hidden';
+ } else {
+ miniPreview.style.visibility = 'visible';
+ updatePreview();
+ }
+});
+
+document.getElementById('populateBtn').addEventListener('click', () => {
+ const htmlSnippet = `<!DOCTYPE html>
+<html>
+<head>
+<title>Sunny Greetings!</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f9f7; /* Light gray background */
+  }
+  h1 {
+    color: #ff9933; /* Sunny orange */
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  p {
+    color: #333; /* Dark gray text */
+    line-height: 1.5;
+    padding: 10px 20px;
+  }
+  a {
+    color: #ff9933; /* Sunny orange links */
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+  <h1>Hello there!</h1>
+  <p>This is a simple email to brighten your day! ☀️ Here's some space to add your message. It could be exciting news, a friendly update, or just a quick hello. </p>
+  <p>Feel free to customize the content and add your own personal touch. You can also change the color scheme to match your preference!</p>
+  <p>Happy emailing!</p>
+  <br>
+  <p>Sincerely,</p>
+  <p>[Your Name]</p>
+</body>
+</html>
+`;
+ insertHTMLSnippet(htmlSnippet);
+});
+
+document.getElementById('imgBtn').addEventListener('click', () => {
+ const htmlSnippet = `<img src="" alt="">`;
+ insertHTMLSnippet(htmlSnippet);
+});
+
+function insertElement(element) {
+ const doc = editor.getDoc();
+ const cursor = doc.getCursor();
+ doc.replaceRange(element, cursor);
+}
+
+function insertHTMLSnippet(html) {
+ const doc = editor.getDoc();
+ const cursor = doc.getCursor();
+ const pos = { line: cursor.line, ch: cursor.ch };
+ doc.replaceRange(html, pos);
+}
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+ const filename = prompt("Enter the file name", "document.html");
+ if (filename) {
+ const blob = new Blob([editor.getValue()], { type: "text/html" });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement("a");
+ a.href = url;
+ a.download = filename;
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ URL.revokeObjectURL(url);
+ }
+});
+
+
+// open extra templates section from left of the page
+const trigger = document.querySelector('.trigger');
+const expandableContent = document.querySelector('.expandable-content');
+
+trigger.addEventListener('click', () => {
+    expandableContent.classList.toggle('expanded');
+    // Change trigger content and position based on state
+    if (expandableContent.classList.contains('expanded')) {
+        trigger.innerHTML = '<span class="material-symbols-outlined">arrow_forward</span>';
+        trigger.style.transform = 'translate(400px) rotate(180deg)'; // Move to right side
+expandableContent.style.transform = 'translate(400px)'
+
+    } else {
+        trigger.innerHTML = '<span class="material-symbols-outlined">arrow_forward</span>';
+        trigger.style.transform = 'translate(0)'; // Move to right side
+expandableContent.style.transform = 'translate(0)'
+    }
+});
+
+
+
+// draggable mini preview
+const dragContainer = document.getElementById('miniPreview');
+const dragHandle = document.getElementById('drag-handle');
+
+let isDragging = false;
+
+// Function to handle mouse down event
+function onMouseDown(event) {
+  event.preventDefault();
+  isDragging = true;
+
+  // Calculate the offset
+  let shiftX = event.clientX - dragContainer.getBoundingClientRect().left;
+  let shiftY = event.clientY - dragContainer.getBoundingClientRect().top;
+
+  function moveAt(clientX, clientY) {
+    const dragContainerRect = dragContainer.getBoundingClientRect();
+    let offsetX = clientX - shiftX;
+    let offsetY = clientY - shiftY;
+
+    // Restrict vertical movement within 80px from the top
+    offsetY = Math.min(Math.max(offsetY, 80), window.innerHeight - 80 - dragContainerRect.height);
+
+    // Restrict horizontal movement within the viewport
+    offsetX = Math.min(Math.max(offsetX, 0), window.innerWidth - dragContainerRect.width);
+
+    // Apply the new position to the draggable element
+    dragContainer.style.left = offsetX + 'px';
+    dragContainer.style.top = offsetY + 'px';
+  }
+
+  // Move the container to the initial position
+  moveAt(event.clientX, event.clientY);
+
+  function onMouseMove(e) {
+    if (isDragging) {
+      moveAt(e.clientX, e.clientY);
+    }
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+
+  document.onmouseup = function () {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.onmouseup = null;
+  };
+}
+
+// Function to handle touch start event
+function onTouchStart(event) {
+  event.preventDefault();
+  isDragging = true;
+
+  let touch = event.targetTouches[0];
+
+  let shiftX = touch.clientX - dragContainer.getBoundingClientRect().left;
+  let shiftY = touch.clientY - dragContainer.getBoundingClientRect().top;
+
+  function moveAt(clientX, clientY) {
+    const dragContainerRect = dragContainer.getBoundingClientRect();
+    let offsetX = clientX - shiftX;
+    let offsetY = clientY - shiftY;
+
+    // Restrict vertical movement within 80px from the top
+    offsetY = Math.min(Math.max(offsetY, 80), window.innerHeight - 80 - dragContainerRect.height);
+
+    // Restrict horizontal movement within the viewport
+    offsetX = Math.min(Math.max(offsetX, 0), window.innerWidth - dragContainerRect.width);
+
+    // Apply the new position to the draggable element
+    dragContainer.style.left = offsetX + 'px';
+    dragContainer.style.top = offsetY + 'px';
+  }
+
+  // Move the container to the initial position
+  moveAt(touch.clientX, touch.clientY);
+
+  function onTouchMove(e) {
+    if (isDragging) {
+      let touch = e.targetTouches[0];
+      moveAt(touch.clientX, touch.clientY);
+    }
+  }
+
+  function onTouchEnd() {
+    isDragging = false;
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+  }
+
+  document.addEventListener('touchmove', onTouchMove);
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+// Add event listeners for both mouse and touch events
+dragHandle.addEventListener('mousedown', onMouseDown);
+dragHandle.addEventListener('touchstart', onTouchStart);
+
+// Event listener to deactivate drag if cursor slips off the target area
+document.addEventListener('mousedown', function (event) {
+  if (!event.target.matches('#drag-handle, #miniPreview')) {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.onmouseup = null;
+  }
+});
+
+dragContainer.ondragstart = function () {
+  return false;
+};
+
+// event listener for loading savestate
+window.addEventListener('load', () => {
+ const savedCode = localStorage.getItem('code');
+ if (savedCode) {
+ editor.setValue(savedCode);
+ }
+});
+		
+</script>
+	
+</body>
+</html>
