@@ -22,9 +22,9 @@
             margin: 0;
             padding;0;
             font-family: Arial, sans-serif;
-            transition: opacity 0.5s ease-in-out;  /* Adjust duration and easing as desired */
             opacity: 0;
-        }
+            transition: opacity 0.5s ease-in-out;  /* Adjust duration and easing as desired */
+}
 
 body.fade-in {
   opacity: 1;
@@ -32,6 +32,11 @@ body.fade-in {
 
 body.fade-out {
   opacity: 0;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 
