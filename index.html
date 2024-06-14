@@ -18,13 +18,14 @@
  padding: 0;
  margin: 0;
  height:100%;
-	 animation: fade-in 1s ease-in-out forwards;
- }
-
-body.fade-page {
-  opacity: 0; /* Initially hidden */
-  animation: fade-in 1s ease-in-out forwards; /* Fade in animation on page load */
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;  /* Adjust duration and easing as desired */
 }
+
+body.fade-in {
+  opacity: 1;
+}
+
 
 @keyframes fade-in {
   from { opacity: 0; }
@@ -751,6 +752,31 @@ document.addEventListener('mousedown', function (event) {
 dragContainer.ondragstart = function () {
   return false;
 };
+
+
+
+	
+window.addEventListener('load', function() {
+  document.body.classList.add('fade-in');
+});
+
+const links = document.querySelectorAll('a');
+
+links.forEach(link => {
+  link.addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent default link behavior
+
+    document.body.classList.remove('fade-in');
+
+    // Add a short delay to ensure animation finishes before navigation
+    setTimeout(() => {
+      window.location.href = this.href;
+    }, 250);  // Adjust delay in milliseconds if needed
+  });
+});
+
+
+	
 
 // event listener for loading savestate
 window.addEventListener('load', () => {
