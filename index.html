@@ -21,12 +21,13 @@
  }
 
 body.fade-page {
-  animation: fade-out 1s ease-in-out forwards; /* Adjust duration and timing as needed */
+  opacity: 0; /* Initially hidden */
+  animation: fade-in 1s ease-in-out forwards; /* Fade in animation on page load */
 }
 
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
  .editor-container {
@@ -761,27 +762,15 @@ window.addEventListener('load', () => {
 
 
 	
-    const links = document.querySelectorAll('a');
+window.addEventListener('DOMContentLoaded', function() {
+  const body = document.body;
+  body.style.opacity = 0; // Initially hidden
 
-    links.forEach(link => {
-      link.addEventListener('click', function(e) {
-        const body = document.body;
-        body.style.opacity = 1;
+  setTimeout(() => {
+    body.style.opacity = 1; // Start fade-in after a slight delay (optional)
+  }, 100); // Adjust delay in milliseconds (optional)
+});
 
-        const fadeOut = setInterval(() => {
-          const currentOpacity = body.style.opacity;
-          if (currentOpacity > 0) {
-            body.style.opacity = currentOpacity - 0.1;
-          } else {
-            clearInterval(fadeOut);
-            // Perform link navigation here (optional)
-            window.location.href = this.href;
-          }
-        }, 10); // Adjust fade duration as needed (10 milliseconds here)
-
-        e.preventDefault(); // Prevent default link behavior
-      });
-    });
 		
 </script>
 	
