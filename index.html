@@ -788,15 +788,7 @@ links.forEach(link => {
   });
 });
 
-// Add event listener for pageshow event
-window.addEventListener('pageshow', function (event) {
-  if (event.persisted) {  // Check if navigation was caused by history (back button)
-    document.body.classList.remove('fade-in');
-    setTimeout(() => {
-      document.body.classList.add('fade-in');
-    }, 250);  // Adjust delay as needed
-  }
-});
+
 	
   </script>
 </body>
