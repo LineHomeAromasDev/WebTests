@@ -30,6 +30,10 @@ body.fade-in {
   opacity: 1;
 }
 
+body.fade-out {
+  opacity: 0;
+}
+
 
         .color-picker-container {
 
@@ -271,7 +275,7 @@ body.fade-in {
 
         });
 
-        window.addEventListener('load', function() {
+window.addEventListener('load', function() {
   document.body.classList.add('fade-in');
 });
 
@@ -282,13 +286,25 @@ links.forEach(link => {
     event.preventDefault(); // Prevent default link behavior
 
     document.body.classList.remove('fade-in');
+    document.body.classList.add('fade-out');
 
-    // Add a short delay to ensure animation finishes before navigation
+    // Add a short delay to ensure animation finishes before reload
     setTimeout(() => {
       window.location.href = this.href;
     }, 250);  // Adjust delay in milliseconds if needed
   });
 });
+
+// Add event listener for pageshow event
+window.addEventListener('pageshow', function (event) {
+  if (event.persisted) {  // Check if navigation was caused by history (back button)
+    document.body.classList.remove('fade-in');
+    setTimeout(() => {
+      document.body.classList.add('fade-in');
+    }, 250);  // Adjust delay as needed
+  }
+});
+
 
 
     </script>
