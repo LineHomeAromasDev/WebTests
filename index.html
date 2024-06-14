@@ -19,6 +19,16 @@
  margin: 0;
  height:100%;
  }
+
+body.fade-page {
+  animation: fade-out 1s ease-in-out forwards; /* Adjust duration and timing as needed */
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
  .editor-container {
  display: flex;
  flex-direction: column;
@@ -746,6 +756,32 @@ window.addEventListener('load', () => {
  editor.setValue(savedCode);
  }
 });
+
+
+
+
+	
+    const links = document.querySelectorAll('a');
+
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        const body = document.body;
+        body.style.opacity = 1;
+
+        const fadeOut = setInterval(() => {
+          const currentOpacity = body.style.opacity;
+          if (currentOpacity > 0) {
+            body.style.opacity = currentOpacity - 0.1;
+          } else {
+            clearInterval(fadeOut);
+            // Perform link navigation here (optional)
+            window.location.href = this.href;
+          }
+        }, 10); // Adjust fade duration as needed (10 milliseconds here)
+
+        e.preventDefault(); // Prevent default link behavior
+      });
+    });
 		
 </script>
 	
