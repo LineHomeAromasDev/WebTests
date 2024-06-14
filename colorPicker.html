@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Color Picker</title>
+
+    <style>
+
+        body {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            height: 100vh;
+
+            margin: 0;
+
+            padding;0;
+
+            font-family: Arial, sans-serif;
+
+            box-sizing:border-box;
+
+        }
+
+        .color-picker-container {
+
+            position: relative;
+
+            width: 90vw;
+
+        }
+
+        #currentColorDisplay {
+
+            width: 100%;
+
+            height:100px;
+
+            background-color: #F1F1F1;
+
+            transition: all 0.2s ease;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            border-radius:15px 15px 0 0;
+
+        }
+
+        #colorPickerCanvas {
+
+            width: 100%;
+
+            height: 100%;
+
+            position:relative;
+
+        }
+
+        #canvasContainer {
+
+          width:100%;
+
+          height:50px;
+
+          position:relative;
+
+          overflow:hidden;
+
+          border-radius:0 0 15px 15px;
+
+        }
+
+        #overlayLine {
+
+            position: absolute;
+
+            top:50%; /* Adjusted to start just below the currentColorDisplay */
+
+            transform: translateY(-50%);
+
+            width: 5px;
+
+            height:calc(100% - 10px);
+
+            background-color: rgba(255,255,255,1);
+
+            border-radius:2.5px;
+
+            pointer-events: none;
+
+            transition: all 0.2s ease;
+
+        }
+
+        #rgbInput {
+
+            height:50px;
+
+            width:auto;
+
+            text-align: center;
+
+            padding:0;
+
+            margin:0;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:rgba(255,255,255,0.5);
+
+            
+
+            cursor: pointer; /* Indicate that the input is clickable */
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="color-picker-container">
+
+        <div id="currentColorDisplay">
+
+          <input type="text" placeholder="No Colour Chosen" id="rgbInput" readonly>
+
+        </div>
+
+        <div id="canvasContainer">
+
+        <canvas id="colorPickerCanvas"></canvas>
+
+        <div id="overlayLine"></div>
+
+    </div>
+
+    
+
+    <script>
+
+        // Function to create the gradient color picker
+
+        function createColorPicker(canvas) {
+
+            const ctx = canvas.getContext('2d');
+
+            const width = canvas.clientWidth;
+
+            const height = canvas.clientHeight;
+
+            // Set canvas width and height based on its container's width and height
+
+            canvas.width = width;
+
+            canvas.height = height;
+
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+            gradient.addColorStop(0, 'red');
+
+            gradient.addColorStop(0.16, 'orange');
+
+            gradient.addColorStop(0.33, 'yellow');
+
+            gradient.addColorStop(0.5, 'green');
+
+            gradient.addColorStop(0.66, 'blue');
+
+            gradient.addColorStop(0.83, 'indigo');
+
+            gradient.addColorStop(1, 'violet');
+
+            ctx.fillStyle = gradient;
+
+            ctx.fillRect(0, 0, width, height);
+
+        }
+
+        // Function to get RGB color from canvas at a specific position
+
+        function getColorAtPosition(canvas, x) {
+
+            const ctx = canvas.getContext('2d');
+
+            const imageData = ctx.getImageData(x, canvas.height / 2, 1, 1).data;
+
+            return `rgb(${imageData[0]}, ${imageData[1]}, ${imageData[2]})`;
+
+        }
+
+        // Initial setup
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const canvas = document.getElementById('colorPickerCanvas');
+
+            const overlayLine = document.getElementById('overlayLine');
+
+            const rgbInput = document.getElementById('rgbInput');
+
+            const currentColorDisplay = document.getElementById('currentColorDisplay');
+
+            createColorPicker(canvas);
+
+            canvas.addEventListener('click', (event) => {
+
+                const rect = canvas.getBoundingClientRect();
+
+                const x = event.clientX - rect.left;
+
+                // Move overlay line
+
+                overlayLine.style.left = `${x}px`;
+
+                // Update RGB input field
+
+                const color = getColorAtPosition(canvas, x);
+
+                rgbInput.value = color;
+
+                // Update the current color display
+
+                currentColorDisplay.style.backgroundColor = color;
+
+            });
+
+            // Ensure the canvas is responsive
+
+            window.addEventListener('resize', () => {
+
+                createColorPicker(canvas);
+
+            });
+
+            // Copy RGB value to clipboard on click
+
+            rgbInput.addEventListener('click', () => {
+
+                navigator.clipboard.writeText(rgbInput.value)
+
+                    .then(() => {
+
+                        alert('RGB value copied to clipboard: ' + rgbInput.value);
+
+                    })
+
+                    .catch(err => {
+
+                        console.error('Failed to copy text: ', err);
+
+                    });
+
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>
