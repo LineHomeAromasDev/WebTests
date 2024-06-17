@@ -51,31 +51,32 @@
 }
  
  
- #topBanner {
- position:fixed;
- top:0;
- left:0;
- margin-bottom:-80px;
- height:80px;
- width:100vw;
- z-index:1000;
- white-space:no-wrap;
- background: rgba(68, 71, 85, 0.5);
- backdrop-filter: blur(5px);
- display:flex;
- justify-content:space-between;
- align-items:center;
- border-bottom: 1px solid rgba(255,255,255,0.1);
- }
- #logoBtn {
- height: fit-content;
- width: fit-content;
- }
- #logoBtn img {
- width:auto;
- height:25px;
- animation: animate 40s linear infinite;
+#topBanner {
+position: fixed;
+top: 0;
+left: 0;
+height: 80px;
+width: 100vw;
+z-index: 1000;
+white-space: nowrap;
+background: rgba(255,255,255, 1);
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
+
+#logoBtn {
+height: fit-content;
+width: fit-content;
+}
+
+#logoBtn img {
+width: 130px;
+height: auto;
+animation: animate 40s linear infinite;
+}
+	 
  #refreshButton {
  height:40px;
  width:40px;
@@ -335,7 +336,7 @@ transition: transform 0.5s ease-in-out; /* Animation for sliding */
  
 <div id="topBanner">
 <button id="refreshButton"><span class="material-symbols-outlined">refresh</span></button>
-<a id="logoBtn"><img src="https://cdn.shopify.com/s/files/1/0550/8782/5151/files/CodeMingle_Pink.svg?v=1718105141" alt="CodeMingle Logo"></a>
+<a id="logoBtn"><img src="https://cdn.shopify.com/s/files/1/0550/8782/5151/files/download.svg?v=1718583230" alt="CodeMingle Logo"></a>
 <button id="themeButton">
             <span class="material-symbols-outlined">brightness_4</span>
 </button>
