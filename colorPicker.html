@@ -1,343 +1,457 @@
-<!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Color Picker</title>
-
-    <style>
-
-        body {
-            box-sizing:border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            padding;0;
-            font-family: Arial, sans-serif;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;  /* Adjust duration and easing as desired */
-}
-
-body.fade-in {
-  opacity: 1;
-}
-
-body.fade-out {
-  opacity: 0;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
- #topBanner {
- position:fixed;
- top:0;
- left:0;
- margin-bottom:-80px;
- height:80px;
- width:100vw;
- z-index:1000;
- white-space:no-wrap;
- background: rgba(68, 71, 85, 0.5);
- backdrop-filter: blur(5px);
- display:flex;
- justify-content:space-between;
- align-items:center;
- border-bottom: 1px solid rgba(255,255,255,0.1);
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Color Picker</title>
+ <style>
+ body {
+ display: flex;
+ flex-direction: row;
+ flex-wrap: nowrap;
+ height: auto;
+ width: 100vw;
+ margin: 0;
+ padding: 10px;
+ font-family: Arial, sans-serif;
+ box-sizing: border-box;
+ background-color: #f8f8f8; /* Set default background color */
  }
-        
-        .color-picker-container {
+#topBanner {
+position: fixed;
+top: 0;
+left: 0;
+height: 80px;
+width: 100vw;
+z-index: 1000;
+white-space: nowrap;
+background: rgba(255,255,255, 1);
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
 
-            position: relative;
+#logoBtn {
+height: fit-content;
+width: fit-content;
+}
 
-            width: 90vw;
+#logoBtn img {
+width: 130px;
+height: auto;
+color:pink;
+animation: animate 40s linear infinite;
+}
 
-        }
+@keyframes animate {
+0% {
+filter: hue-rotate(-5deg);
+}
+100% {
+filter: hue-rotate(360deg);
+}
+}
 
-        #currentColorDisplay {
+.color-picker-container {
+position: relative;
+display: flex;
+flex-wrap: wrap; /* Wrap columns if necessary */
+margin-top: 80px;
+width: 100%;
 
-            width: 100%;
+}
 
-            height:100px;
+.column {
+flex: 1;
+padding: 10px;
+margin:10px;
+border: 1px solid rgba(0, 0, 0, 0.2);
+border-radius:10px;
+box-sizing: border-box;
+}
 
-            background-color: #F1F1F1;
+#currentColorDisplay, #complementaryColorDisplay {
+width: 100%;
+height: 150px;
+background-color: #F1F1F1;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+}
 
-            transition: all 0.2s ease;
+.colorDisplayContainer {
+width: 100%; /* Adjust width of color display containers */
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
 
-            display:flex;
+#colorPickerCanvas {
+width: 100%;
+height: 100%;
+position: relative;
+padding: 0;
+margin: 0;
+}
 
-            align-items:center;
+#canvasContainer {
+width: 100%;
+height: auto;
+aspect-ratio:1/1;
+position: relative;
+overflow: hidden;
+}
 
-            justify-content:center;
+#overlayLine {
+position: absolute;
+top: 50%;
+left: 0;
+transform: translateY(-50%);
+width: 3px;
+height: calc(100% - 10px);
+background-color: rgba(255, 255, 255, 1);
+border-radius: 1.5px;
+pointer-events: none;
+transition: all 0s ease;
+}
 
-            border-radius:15px 15px 0 0;
+.color-code {
+height: 30px;
+width: 95%;
+text-align: center;
+padding: 0;
+margin: 5px;
+border: none;
+border-radius: 10px;
+background: rgba(255, 255, 255, 0.5);
+cursor: pointer; /* Indicate that the input is clickable */
+display: inline-block;
+}
 
-        }
+.color-scheme {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+align-items: center;
+width: 100%;
+margin: 0;
+}
 
-        #colorPickerCanvas {
+.color-box {
+width: auto;
+height: 100px;
+margin: 0;
+padding: 0;
+display: flex;
+align-items: center;
+justify-content: space-evenly;
+flex-direction: column;
+flex: 3;
+}
 
-            width: 100%;
+.color-box input {
+width: 90%;
+text-align: center;
+border: none;
+border-radius: 5px;
+background: rgba(255, 255, 255, 0.5);
+}
 
-            height: 100%;
+@media only screen and (max-width: 600px) {
 
-            position:relative;
+.column {
+flex:1;
+flex-basis:100%;
+}
 
-        }
-
-        #canvasContainer {
-
-          width:100%;
-
-          height:50px;
-
-          position:relative;
-
-          overflow:hidden;
-
-          border-radius:0 0 15px 15px;
-
-        }
-
-        #overlayLine {
-
-            position: absolute;
-
-            top:50%; /* Adjusted to start just below the currentColorDisplay */
-
-            transform: translateY(-50%);
-
-            width: 5px;
-
-            height:calc(100% - 10px);
-
-            background-color: rgba(255,255,255,1);
-
-            border-radius:2.5px;
-
-            pointer-events: none;
-
-            transition: all 0.2s ease;
-
-        }
-
-        #rgbInput {
-
-            height:50px;
-
-            width:auto;
-
-            text-align: center;
-
-            padding:0;
-
-            margin:0;
-
-            border:none;
-
-            border-radius:10px;
-
-            background:rgba(255,255,255,0.5);
-
-            
-
-            cursor: pointer; /* Indicate that the input is clickable */
-
-        }
-
-    </style>
+}
+</style>
 
 </head>
-
 <body>
-
 <div id="topBanner">
-<button id="refreshButton"><span class="material-symbols-outlined">refresh</span></button>
-<a id="logoBtn"><img src="https://cdn.shopify.com/s/files/1/0550/8782/5151/files/CodeMingle_Pink.svg?v=1718105141" alt="CodeMingle Logo"></a>
-<button id="themeButton">
-            <span class="material-symbols-outlined">brightness_4</span>
-</button>
+ <button id="refreshButton"><span class="material-symbols-outlined"></span></button>
+ <a id="logoBtn"><img src="https://cdn.shopify.com/s/files/1/0550/8782/5151/files/download.svg?v=1718583230" alt="CodeMingle Logo"></a>
+ <button id="themeButton">
+ <span class="material-symbols-outlined"></span>
+ </button>
 </div>
-
-    <div class="color-picker-container">
-
-        <div id="currentColorDisplay">
-
-          <input type="text" placeholder="No Colour Chosen" id="rgbInput" readonly>
-
-        </div>
-
-        <div id="canvasContainer">
-
-        <canvas id="colorPickerCanvas"></canvas>
-
-        <div id="overlayLine"></div>
-
-    </div>
-
-    
-
-    <script>
-
-        // Function to create the gradient color picker
-
-        function createColorPicker(canvas) {
-
-            const ctx = canvas.getContext('2d');
-
-            const width = canvas.clientWidth;
-
-            const height = canvas.clientHeight;
-
-            // Set canvas width and height based on its container's width and height
-
-            canvas.width = width;
-
-            canvas.height = height;
-
-            const gradient = ctx.createLinearGradient(0, 0, width, 0);
-
-            gradient.addColorStop(0, 'red');
-
-            gradient.addColorStop(0.16, 'orange');
-
-            gradient.addColorStop(0.33, 'yellow');
-
-            gradient.addColorStop(0.5, 'green');
-
-            gradient.addColorStop(0.66, 'blue');
-
-            gradient.addColorStop(0.83, 'indigo');
-
-            gradient.addColorStop(1, 'violet');
-
-            ctx.fillStyle = gradient;
-
-            ctx.fillRect(0, 0, width, height);
-
-        }
-
-        // Function to get RGB color from canvas at a specific position
-
-        function getColorAtPosition(canvas, x) {
-
-            const ctx = canvas.getContext('2d');
-
-            const imageData = ctx.getImageData(x, canvas.height / 2, 1, 1).data;
-
-            return `rgb(${imageData[0]}, ${imageData[1]}, ${imageData[2]})`;
-
-        }
-
-        // Initial setup
-
-        document.addEventListener('DOMContentLoaded', () => {
-
-            const canvas = document.getElementById('colorPickerCanvas');
-
-            const overlayLine = document.getElementById('overlayLine');
-
-            const rgbInput = document.getElementById('rgbInput');
-
-            const currentColorDisplay = document.getElementById('currentColorDisplay');
-
-            createColorPicker(canvas);
-
-            canvas.addEventListener('click', (event) => {
-
-                const rect = canvas.getBoundingClientRect();
-
-                const x = event.clientX - rect.left;
-
-                // Move overlay line
-
-                overlayLine.style.left = `${x}px`;
-
-                // Update RGB input field
-
-                const color = getColorAtPosition(canvas, x);
-
-                rgbInput.value = color;
-
-                // Update the current color display
-
-                currentColorDisplay.style.backgroundColor = color;
-
-            });
-
-            // Ensure the canvas is responsive
-
-            window.addEventListener('resize', () => {
-
-                createColorPicker(canvas);
-
-            });
-
-            // Copy RGB value to clipboard on click
-
-            rgbInput.addEventListener('click', () => {
-
-                navigator.clipboard.writeText(rgbInput.value)
-
-                    .then(() => {
-
-                        alert('RGB value copied to clipboard: ' + rgbInput.value);
-
-                    })
-
-                    .catch(err => {
-
-                        console.error('Failed to copy text: ', err);
-
-                    });
-
-            });
-
-        });
-
-window.addEventListener('load', function() {
-  document.body.classList.add('fade-in');
+<div class="color-picker-container">
+ <div class="column">
+ <div id="complementaryColorDisplay">
+ <p1>Complementary</p1>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="Hex" id="complementaryHexInput" class="color-code" readonly>
+ </span>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="RGB" id="complementaryRgbInput" class="color-code" readonly>
+ </span>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="CMYK" id="complementaryCmykInput" class="color-code" readonly>
+ </span>
+ </div>
+ <div class="color-scheme" id="complementaryColorScheme">
+ <div class="color-box" id="complementaryColorBox1">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+ <div class="color-box" id="complementaryColorBox2">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+ <div class="color-box" id="complementaryColorBox3">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+ </div>
+ <div id="currentColorDisplay">
+ <p1>Result</p1>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="Hex" id="hexInput" class="color-code" readonly>
+ </span>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="RGB" id="rgbInput" class="color-code" readonly>
+ </span>
+ <span class=colorDisplayContainer>
+ <input type="text" placeholder="CMYK" id="cmykInput" class="color-code" readonly>
+ </span>
+ </div>
+ <!-- Color Scheme Sections -->
+<div class="color-scheme" id="resultColorScheme">
+ <div class="color-box" id="resultColorBox1">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+ <div class="color-box" id="resultColorBox2">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+ <div class="color-box" id="resultColorBox3">
+ <input type="text" readonly>
+ <input type="text" readonly>
+ </div>
+</div>
+</div>
+<div class="column">
+ <div id="canvasContainer">
+ <canvas id="colorPickerCanvas"></canvas>
+ <div id="overlayLine"></div>
+ </div>
+</div>
+</div>
+<script>
+let isDraggingColorPicker = false;
+
+// Function to create the gradient color picker
+function createColorPicker(canvas) {
+ const ctx = canvas.getContext('2d');
+ const width = canvas.clientWidth;
+ const height = canvas.clientHeight;
+
+ // Set canvas width and height based on its container's width and height
+ canvas.width = width;
+ canvas.height = height;
+
+ const gradient = ctx.createLinearGradient(0, 0, width, 0);
+ gradient.addColorStop(0, 'red');
+ gradient.addColorStop(0.11, 'orange');
+ gradient.addColorStop(0.22, 'yellow');
+ gradient.addColorStop(0.33, 'green');
+ gradient.addColorStop(0.44, 'aqua');
+ gradient.addColorStop(0.55, 'blue');
+ gradient.addColorStop(0.66, 'purple');
+ gradient.addColorStop(0.77, 'fuchsia');
+ gradient.addColorStop(0.88, 'red');
+
+ ctx.fillStyle = gradient;
+ ctx.fillRect(0, 0, width, height);
+
+ const gradientWhite = ctx.createLinearGradient(0, 0, 0, height);
+ gradientWhite.addColorStop(0, 'rgba(255,255,255,1)');
+ gradientWhite.addColorStop(0.5, 'rgba(255,255,255,0)');
+
+ ctx.fillStyle = gradientWhite;
+ ctx.fillRect(0, 0, width, height);
+
+ const gradientBlack = ctx.createLinearGradient(0, 0, 0, height);
+ gradientBlack.addColorStop(0.5, 'rgba(0,0,0,0)');
+ gradientBlack.addColorStop(1, 'rgba(0,0,0,1)');
+
+ ctx.fillStyle = gradientBlack;
+ ctx.fillRect(0, 0, width, height);
+}
+
+// Function to get the color from the canvas at a specific position
+function getColorFromCanvas(canvas, x, y) {
+ const ctx = canvas.getContext('2d');
+ const imageData = ctx.getImageData(x, y, 1, 1).data;
+ return {
+ r: imageData[0],
+ g: imageData[1],
+ b: imageData[2],
+ rgb: `rgb(${imageData[0]}, ${imageData[1]}, ${imageData[2]})`,
+ hex: rgbToHex(imageData[0], imageData[1], imageData[2])
+ };
+}
+
+// Function to convert RGB to HEX
+function rgbToHex(r, g, b) {
+ return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+// Function to update the display with the selected color
+function updateDisplay(color) {
+ document.getElementById('hexInput').value = color.hex;
+ document.getElementById('rgbInput').value = color.rgb;
+ document.getElementById('cmykInput').value = rgbToCmyk(color.r, color.g, color.b);
+ document.getElementById('currentColorDisplay').style.backgroundColor = color.hex;
+
+ const complementaryColor = getComplementaryColor(color.r, color.g, color.b);
+ document.getElementById('complementaryHexInput').value = complementaryColor.hex;
+ document.getElementById('complementaryRgbInput').value = complementaryColor.rgb;
+ document.getElementById('complementaryCmykInput').value = rgbToCmyk(complementaryColor.r, complementaryColor.g, complementaryColor.b);
+ document.getElementById('complementaryColorDisplay').style.backgroundColor = complementaryColor.hex;
+
+ updateColorScheme(color, 'resultColorScheme');
+ updateColorScheme(complementaryColor, 'complementaryColorScheme');
+}
+
+// Function to update color scheme display
+function updateColorScheme(baseColor, schemeId) {
+ const colorScheme = generateColorScheme(baseColor);
+ const colorSchemeContainer = document.getElementById(schemeId);
+
+ // Clear previous color boxes
+ colorSchemeContainer.innerHTML = '';
+
+ colorScheme.forEach(color => {
+ const colorBox = document.createElement('div');
+ colorBox.className = 'color-box';
+ colorBox.style.backgroundColor = color.hex;
+
+ const hexInput = document.createElement('input');
+ hexInput.type = 'text';
+ hexInput.readOnly = true;
+ hexInput.value = color.hex;
+
+ const rgbInput = document.createElement('input');
+ rgbInput.type = 'text';
+ rgbInput.readOnly = true;
+ rgbInput.value = color.rgb;
+
+ colorBox.appendChild(hexInput);
+ colorBox.appendChild(rgbInput);
+ colorSchemeContainer.appendChild(colorBox);
+ });
+}
+
+// Function to generate a color scheme based on the base color with minimal differences
+function generateColorScheme(baseColor) {
+ const colors = [];
+ for (let i = -1; i <= 1; i++) {
+ const shade = adjustColor(baseColor.hex, i * 10); // Adjust color by 10 hex steps
+ const rgb = hexToRgb(shade);
+ colors.push({ hex: shade, rgb: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` });
+ }
+ return colors;
+}
+
+// Function to adjust a color by a specified number of hex steps
+function adjustColor(color, steps) {
+ const f = parseInt(color.slice(1), 16);
+ const R = Math.min(255, Math.max(0, ((f >> 16) & 0xFF) + steps));
+ const G = Math.min(255, Math.max(0, ((f >> 8) & 0xFF) + steps));
+ const B = Math.min(255, Math.max(0, (f & 0xFF) + steps));
+ return `#${((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1).toUpperCase()}`;
+}
+
+// Function to convert hex to RGB
+function hexToRgb(hex) {
+ const bigint = parseInt(hex.slice(1), 16);
+ const r = (bigint >> 16) & 255;
+ const g = (bigint >> 8) & 255;
+ const b = bigint & 255;
+ return { r, g, b };
+}
+
+// Function to convert RGB to CMYK
+function rgbToCmyk(r, g, b) {
+ const c = 1 - (r / 255);
+ const m = 1 - (g / 255);
+ const y = 1 - (b / 255);
+ const k = Math.min(c, m, y);
+ const cmyk = [
+ Math.round(((c - k) / (1 - k)) * 100),
+ Math.round(((m - k) / (1 - k)) * 100),
+ Math.round(((y - k) / (1 - k)) * 100),
+ Math.round(k * 100)
+ ];
+ return `cmyk(${cmyk.join('% , ')}%)`;
+}
+
+// Function to get complementary color
+function getComplementaryColor(r, g, b) {
+ const compColor = {
+ r: 255 - r,
+ g: 255 - g,
+ b: 255 - b
+ };
+ compColor.rgb = `rgb(${compColor.r}, ${compColor.g}, ${compColor.b})`;
+ compColor.hex = rgbToHex(compColor.r, compColor.g, compColor.b);
+ return compColor;
+}
+
+window.addEventListener('load', () => {
+ const canvas = document.getElementById('colorPickerCanvas');
+ const overlayLine = document.getElementById('overlayLine');
+ createColorPicker(canvas);
+
+ function handleColorSelection(event) {
+ if (isDraggingColorPicker) {
+ const rect = canvas.getBoundingClientRect();
+ const x = event.clientX - rect.left;
+ const y = event.clientY - rect.top;
+ const color = getColorFromCanvas(canvas, x, y);
+ updateDisplay(color);
+ overlayLine.style.left = `${x}px`;
+ }
+ }
+
+ canvas.addEventListener('mousedown', (event) => {
+ isDraggingColorPicker = true;
+ handleColorSelection(event);
+ });
+ 
+ canvas.addEventListener('touchmove', () => {
+   isDraggingColorPicker = true;
+ });
+
+ canvas.addEventListener('mousemove', handleColorSelection);
+ 
+ canvas.addEventListener('mousemove', (event) => {
+   isDraggingColorPicker = true;
+   handleColorSelection(event);
+ });
+
+ canvas.addEventListener('mouseup', () => {
+ isDraggingColorPicker = false;
+ });
+
+ canvas.addEventListener('mouseleave', () => {
+ isDraggingColorPicker = false;
+ });
+ 
+ canvas.addEventListener('touchleave', () => {
+   isDraggingColorPicker = false;
+ });
+
+ // Prevent text selection while dragging the color picker
+ canvas.addEventListener('dragstart', (event) => {
+ event.preventDefault();
+ });
 });
-
-const links = document.querySelectorAll('a');
-
-links.forEach(link => {
-  link.addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default link behavior
-
-    document.body.classList.remove('fade-in');
-    document.body.classList.add('fade-out');
-
-    // Add a short delay to ensure animation finishes before reload
-    setTimeout(() => {
-      window.location.href = this.href;
-    }, 250);  // Adjust delay in milliseconds if needed
-  });
-});
-
-// Add event listener for pageshow event
-window.addEventListener('pageshow', function (event) {
-  if (event.persisted) {  // Check if navigation was caused by history (back button)
-    document.body.classList.remove('fade-in');
-    setTimeout(() => {
-      document.body.classList.add('fade-in');
-    }, 250);  // Adjust delay as needed
-  }
-});
-
-
-
-    </script>
-
+</script>
 </body>
-
 </html>
